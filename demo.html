@@ -178,6 +178,23 @@ h1{font:700 clamp(36px,5.4vw,64px)/1.02 var(--display);letter-spacing:-.025em;ma
 .de-rail .ready b{color:var(--orange-2)}
 .de-rail .ready small{font:700 11.5px/1.2 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--orange-2)}
 .de-rail .ready .btn{align-self:flex-start;margin-top:4px}
+.de-rail{grid-template-columns:repeat(4,minmax(0,1fr)) minmax(0,1.45fr)}
+.de-rail .ready{padding-top:24px;box-shadow:0 0 60px -24px #ff8a3d}
+.de-rail .bound{position:absolute;top:-13px;left:16px;background:var(--orange);color:#1a0d04;font:800 11.5px/1 var(--body);letter-spacing:.18em;text-transform:uppercase;padding:7px 11px;border-radius:999px;box-shadow:0 6px 18px -6px #ff8a3daa}
+.de-chan{display:flex;flex-wrap:wrap;gap:6px}
+.de-chan span{font:700 12.5px/1 var(--body);padding:8px 10px;border-radius:999px;border:1px solid #ff8a3d99;color:#fff;background:rgba(255,138,61,.1)}
+.de-rail .de-hand{font-size:14.5px;color:var(--fg-3)}
+.de-map{position:absolute;inset:0}
+.de-stage.has-map canvas[data-city],.de-stage.has-map .de-drag,.de-stage.has-map .de-tag{display:none}
+.de-stage .mapboxgl-ctrl-attrib{font-size:11px}
+.de-stop{display:inline-flex;align-self:flex-start;margin-top:8px;font:700 13.5px/1 var(--body);color:#fff;background:rgba(59,140,255,.24);border:1px solid var(--blue);border-radius:999px;padding:8px 12px}
+.de-stop:empty{display:none}
+.de-pin{display:flex;flex-direction:column;align-items:center;gap:7px;pointer-events:none}
+.de-pin b{font:700 13px/1.1 var(--body);color:#fff;background:rgba(5,9,22,.86);border:1px solid var(--blue);border-radius:999px;padding:6px 10px;white-space:nowrap;box-shadow:0 8px 22px -8px #000}
+.de-pin i{width:16px;height:16px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 6px rgba(59,140,255,.3),0 0 30px 12px rgba(59,140,255,.55);animation:pinpulse 2s ease-in-out infinite}
+.de-pin.on b{border-color:var(--orange);background:rgba(40,18,6,.92)}
+.de-pin.on i{background:var(--orange);box-shadow:0 0 0 6px rgba(255,138,61,.3),0 0 30px 12px rgba(255,138,61,.6)}
+@keyframes pinpulse{50%{transform:scale(1.3)}}
 @media (max-width:1000px){.de-rail{grid-template-columns:repeat(2,minmax(0,1fr))}.de-rail li::after{display:none}.de-rail .ready{grid-column:1/-1}}
 @media (max-width:560px){.de-rail{grid-template-columns:minmax(0,1fr)}}
 
@@ -659,7 +676,7 @@ figcaption{font-size:14px;color:var(--fg-3)}
     </div>
   </div>
   <ol class="wrap roles" aria-label="Who does what">
-    <li class="role"><span class="role-ic"><svg class="ic" aria-hidden="true"><use href="#i-radar"/></svg></span><div><small>Data Engine</small><b>Finds who to talk to</b><p>Owners with a reason to move, traced and checked. It stops at ready to launch.</p></div></li>
+    <li class="role"><span class="role-ic"><svg class="ic" aria-hidden="true"><use href="#i-radar"/></svg></span><div><small>Data Engine</small><b>Finds who to talk to</b><p>Skip traced, auto-tagged and staged in outreach blocks. It stops at ready to launch.</p></div></li>
     <li class="role r-nx"><span class="role-ic"><span class="lg lg-nx-mark" role="img" aria-label="Nextier logo"></span></span><div><small>Nextier</small><b>Handles the texts</b><p>The first text, every reply and the routing to your agent.</p></div></li>
     <li class="role r-cg"><span class="role-ic"><span class="lg lg-cg-cloud inv" role="img" aria-label="CloudGreet logo"></span></span><div><small>CloudGreet</small><b>Handles the calls</b><p>Answers, captures the details and books the appointment.</p></div></li>
     <li class="role r-team"><span class="role-ic"><svg class="ic" aria-hidden="true"><use href="#i-hand"/></svg></span><div><small>Your agents</small><b>Take the meeting</b><p>With the whole conversation in hand.</p></div></li>
@@ -673,16 +690,17 @@ figcaption{font-size:14px;color:var(--fg-3)}
   <section class="wrap step" id="data-engine" aria-labelledby="de-h" data-de>
     <div class="step-head">
       <h2 class="step-h" id="de-h"><span class="n">01 /</span> <span class="b-nx">Data Engine</span> <span class="k">finds who to talk to</span></h2>
-      <p class="flow" aria-hidden="true">Source <i>→</i> Enrich <i>→</i> Trace <i>→</i> Check <i>→</i> Ready</p>
+      <p class="flow" aria-hidden="true">Source <i>→</i> Enrich <i>→</i> Skip trace <i>→</i> Auto-tag <i>→</i> Ready</p>
     </div>
-    <p class="intro" data-de-intro>Before a single text goes out, the data engine finds the owners with a reason to move, fills in every record and traces a mobile number with Tracerfy when one is missing. It stops in one place: an initial SMS, ready for a person to launch.</p>
+    <p class="intro" data-de-intro>Before a single text goes out, the data engine finds the owners with a reason to move, fills in every record, skip traces a mobile with Tracerfy when one is missing and auto-tags every lead. Then it stops at a hard boundary: held blocks, ready to launch into initial SMS or any outreach channel. A person presses launch.</p>
     <div class="de-grid">
       <div class="de-stage" data-de-stage>
         <canvas data-city aria-hidden="true"></canvas>
         <div class="de-hud">
-          <span class="de-scan"><i></i><span data-de-where>Scanning · Suffolk County, NY</span></span>
+          <span class="de-scan"><i></i><span data-de-where>Scanning · Long Island, NY</span></span>
           <b class="de-count" data-de-count>1,208</b>
           <span class="de-label" data-de-label>Subdivision-size lots</span>
+          <span class="de-stop" data-de-stop></span>
         </div>
         <span class="de-drag">Drag to turn the city</span>
         <span class="de-tag">3D view is an illustration</span>
@@ -697,15 +715,15 @@ figcaption{font-size:14px;color:var(--fg-3)}
           <button type="button" aria-pressed="false"><b>1,560</b><span>Expired listings</span><small>Never relisted or sold</small></button>
           <button type="button" aria-pressed="false"><b>3,170</b><span>Commercial held 5+ years</span><small>Not listed: parking lots, strip centers, car lots, motels</small></button>
         </div>
-        <p class="src" data-de-src>Example market: Suffolk County, NY. Individually owned, counted Oct 9, 2026. Individual owners go first; LLCs and trusts go to research.</p>
+        <p class="src" data-de-src>Example market: Long Island, NY. Individually owned, counted Oct 9, 2026. Individual owners go first; LLCs and trusts go to research.</p>
       </div>
     </div>
     <ol class="de-rail" data-de-rail>
       <li><span class="ib"><svg class="ic" aria-hidden="true"><use href="#i-layers"/></svg></span><b>Source</b><p>RealEstateAPI, county records and Apify find the properties and the owners.</p></li>
       <li><span class="ib"><svg class="ic" aria-hidden="true"><use href="#i-doc"/></svg></span><b>Enrich</b><p>Equity, liens, notices, lot size and years owned on every record.</p></li>
-      <li><span class="ib"><svg class="ic" aria-hidden="true"><use href="#i-radar"/></svg></span><b>Trace</b><p>Tracerfy finds the owner's mobile, only when the record doesn't already have one.</p></li>
-      <li><span class="ib"><svg class="ic" aria-hidden="true"><use href="#i-filter"/></svg></span><b>Check</b><p>Line type, do-not-call, opt-outs and duplicates, before anything is queued.</p></li>
-      <li class="ready"><span class="ib"><svg class="ic" aria-hidden="true"><use href="#i-msg"/></svg></span><small>The engine stops here</small><b>Initial SMS ready to launch</b><p>Staged on the owner's mobile. A person presses launch.</p><a class="btn btn-primary btn-sm" href="#re-start" data-de-next>See the first text <span aria-hidden="true">↓</span></a></li>
+      <li><span class="ib"><svg class="ic" aria-hidden="true"><use href="#i-radar"/></svg></span><b>Skip trace</b><p>Tracerfy finds the owner's mobile, only when the record doesn't already have one.</p></li>
+      <li><span class="ib"><svg class="ic" aria-hidden="true"><use href="#i-filter"/></svg></span><b>Auto-tag</b><p>Every lead is tagged on arrival: source, segment, area and signals. Line type, do-not-call, opt-outs and duplicates are checked.</p></li>
+      <li class="ready"><span class="bound">The boundary</span><span class="ib"><svg class="ic" aria-hidden="true"><use href="#i-msg"/></svg></span><b>Ready to launch</b><p>Skip traced, auto-tagged and staged as held blocks. Nothing goes out until a person launches it.</p><div class="de-chan"><span>Initial SMS blocks</span><span>Contact Center</span><span>Dialer</span><span>Any outreach campaign</span></div><p class="de-hand">Hand off to your own tools through the Data Engine API, a CSV or a webhook connector we set up for you.</p><a class="btn btn-primary btn-sm" href="#re-start">See the first text <span aria-hidden="true">↓</span></a></li>
     </ol>
   </section>
 
@@ -802,7 +820,7 @@ figcaption{font-size:14px;color:var(--fg-3)}
     </div>
   </div>
   <ol class="wrap roles" aria-label="Who does what">
-    <li class="role"><span class="role-ic"><svg class="ic" aria-hidden="true"><use href="#i-radar"/></svg></span><div><small>Data Engine</small><b>Finds who to talk to</b><p>Companies and owners worth calling, traced and checked. It stops at the call list.</p></div></li>
+    <li class="role"><span class="role-ic"><svg class="ic" aria-hidden="true"><use href="#i-radar"/></svg></span><div><small>Data Engine</small><b>Finds who to talk to</b><p>Companies and owners worth calling, skip traced, auto-tagged and staged. It stops at ready to launch.</p></div></li>
     <li class="role r-nx"><span class="role-ic"><span class="lg lg-nx-mark" role="img" aria-label="Nextier logo"></span></span><div><small>Nextier</small><b>Handles the texts</b><p>The follow-up text they asked for, every reply and the routing.</p></div></li>
     <li class="role r-cg"><span class="role-ic"><span class="lg lg-cg-cloud inv" role="img" aria-label="CloudGreet logo"></span></span><div><small>CloudGreet</small><b>Handles the calls</b><p>Answers, qualifies and books the meeting.</p></div></li>
     <li class="role r-team"><span class="role-ic"><svg class="ic" aria-hidden="true"><use href="#i-hand"/></svg></span><div><small>Your reps</small><b>Take the meeting</b><p>Qualified, prepared and on the calendar.</p></div></li>
@@ -1657,46 +1675,60 @@ const booking = (() => {
 })();
 
 /* ───────── data engine: 3D city scan ───────── */
+const PL = {
+  riverhead: [-72.662, 40.917], wadingRiver: [-72.8426, 40.9503], centerMoriches: [-72.7898, 40.8034],
+  masticBeach: [-72.8521, 40.7668], manorville: [-72.8079, 40.8737], medford: [-72.9998, 40.8176],
+  middleIsland: [-72.9373, 40.8843], smithtown: [-73.2007, 40.8559], syosset: [-73.5021, 40.8262],
+  mastic: [-72.841, 40.802], melville: [-73.4151, 40.7934], hauppauge: [-73.2121, 40.8256], ronkonkoma: [-73.1123, 40.8154]
+};
+const READY_HAND = "Hand off to your own tools through the Data Engine API, a CSV or a webhook connector we set up for you.";
+const B2B_PLACES = [["Route 110 corridor", PL.melville], ["Hauppauge", PL.hauppauge], ["Ronkonkoma", PL.ronkonkoma], ["Riverhead", PL.riverhead]];
 const DE = {
   re: {
-    where: "Scanning · Suffolk County, NY", title: "Owners with a reason to move",
-    intro: "Before a single text goes out, the data engine finds the owners with a reason to move, fills in every record and traces a mobile number with Tracerfy when one is missing. It stops in one place: an initial SMS, ready for a person to launch.",
-    src: "Example market: Suffolk County, NY. Individually owned, counted Oct 9, 2026. Individual owners go first; LLCs and trusts go to research.",
-    next: "#re-start", nextLabel: "See the first text",
+    where: "Scanning · Long Island, NY", title: "Owners with a reason to move",
+    intro: "Before a single text goes out, the data engine finds the owners with a reason to move, fills in every record, skip traces a mobile with Tracerfy when one is missing and auto-tags every lead. Then it stops at a hard boundary: held blocks, ready to launch into initial SMS or any outreach channel. A person presses launch.",
+    src: "Example market: Long Island, NY. Individually owned, counted Oct 9, 2026. Individual owners go first; LLCs and trusts go to research.",
+    overview: { center: [-72.98, 40.86], zoom: 9.15, label: "Long Island, NY" },
     cats: [
-      { n: 1208, l: "Subdivision-size lots", d: "0.90+ acres, room for 3 to 4 home sites", p: .07 },
-      { n: 2058, l: "Vacant parcels", d: "0.40+ acres in your hamlets", kind: "vacant" },
-      { n: 15036, l: "Older homes on big lots", d: "Built 1975 or earlier, 0.40+ acres, not listed", p: .26 },
-      { n: 4120, l: "Estate and inherited", d: "On oversized lots", p: .11 },
-      { n: 1560, l: "Expired listings", d: "Never relisted or sold", p: .06 },
-      { n: 3170, l: "Commercial held 5+ years", d: "Not listed: parking lots, strip centers, car lots, motels", kind: "com" }
+      { n: 1208, l: "Subdivision-size lots", d: "0.90+ acres, room for 3 to 4 home sites", p: .07, unit: "lots",
+        places: [["Riverhead", PL.riverhead, 434], ["Center Moriches", PL.centerMoriches, 237], ["Wading River", PL.wadingRiver, 218], ["Mastic Beach", PL.masticBeach, 16]] },
+      { n: 2058, l: "Vacant parcels", d: "0.40+ acres in your hamlets", kind: "vacant", unit: "parcels",
+        places: [["Manorville", PL.manorville, 269], ["Riverhead", PL.riverhead, 176], ["Medford", PL.medford, 156], ["Middle Island", PL.middleIsland, 145]] },
+      { n: 15036, l: "Older homes on big lots", d: "Built 1975 or earlier, 0.40+ acres, not listed", p: .26, unit: "homes",
+        places: [["Smithtown", PL.smithtown, 2373], ["Medford", PL.medford, 1049], ["Syosset", PL.syosset, 933], ["Riverhead", PL.riverhead, 901]] },
+      { n: 4120, l: "Estate and inherited", d: "On oversized lots, 1,598 of them on 0.90+ acres", p: .11, places: [] },
+      { n: 1560, l: "Expired listings", d: "Never relisted or sold, 707 on a big lot", p: .06, places: [] },
+      { n: 3170, l: "Commercial held 5+ years", d: "Not listed: parking lots, strip centers, car lots, motels", kind: "com", unit: "properties",
+        places: [["Route 110 corridor", PL.melville, 2021], ["Mastic to the Moriches", PL.mastic, 640], ["Riverhead area", PL.riverhead, 509]] }
     ],
-    rail: [
+    steps: [
       ["i-layers", "Source", "RealEstateAPI, county records and Apify find the properties and the owners."],
       ["i-doc", "Enrich", "Equity, liens, notices, lot size and years owned on every record."],
-      ["i-radar", "Trace", "Tracerfy finds the owner's mobile, only when the record doesn't already have one."],
-      ["i-filter", "Check", "Line type, do-not-call, opt-outs and duplicates, before anything is queued."],
-      ["i-msg", "Initial SMS ready to launch", "Staged on the owner's mobile. A person presses launch.", true]
-    ]
+      ["i-radar", "Skip trace", "Tracerfy finds the owner's mobile, only when the record doesn't already have one."],
+      ["i-filter", "Auto-tag", "Every lead is tagged on arrival: source, segment, area and signals. Line type, do-not-call, opt-outs and duplicates are checked."]
+    ],
+    ready: { title: "Ready to launch", text: "Skip traced, auto-tagged and staged as held blocks. Nothing goes out until a person launches it.",
+      chans: ["Initial SMS blocks", "Contact Center", "Dialer", "Any outreach campaign"], hand: READY_HAND, next: "#re-start", label: "See the first text" }
   },
   b2b: {
-    where: "Scanning · your market", title: "Companies worth a call",
-    intro: "Before a rep picks up the phone, the data engine finds the companies and owners worth calling, fills in every record and traces a direct mobile with Tracerfy when one is missing. It stops in one place: a call list, ready for your reps.",
+    where: "Scanning · Long Island business districts", title: "Companies worth a call",
+    intro: "Before a rep picks up the phone, the data engine finds the companies and owners worth calling, fills in every record, skip traces a direct mobile with Tracerfy when one is missing and auto-tags every lead. Then it stops at a hard boundary: held blocks, ready to launch into a call list or any outreach channel. A person makes the first touch.",
     src: "Segments shown are examples. In your demo we count your real market.",
-    next: "#b2b-start", nextLabel: "See the first touch",
+    overview: { center: [-73.25, 40.8], zoom: 9.3, label: "Long Island, NY" },
     cats: [
-      { l: "Owner-operated businesses", d: "The owner still answers the phone", p: .14 },
-      { l: "Long-tenured owners", d: "10+ years in business", p: .12 },
-      { l: "Multi-location operators", d: "Two or more locations", kind: "com" },
-      { l: "Recently expanded", d: "A new location or new hires", p: .07 }
+      { l: "Owner-operated businesses", d: "The owner still answers the phone", p: .14, places: B2B_PLACES },
+      { l: "Long-tenured owners", d: "10+ years in business", p: .12, places: B2B_PLACES },
+      { l: "Multi-location operators", d: "Two or more locations", kind: "com", places: B2B_PLACES },
+      { l: "Recently expanded", d: "A new location or new hires", p: .07, places: B2B_PLACES }
     ],
-    rail: [
+    steps: [
       ["i-layers", "Source", "USBizData and Apify find the companies and the owners."],
       ["i-doc", "Enrich", "Industry, size, years in business and location on every record."],
-      ["i-radar", "Trace", "Tracerfy finds a direct mobile, only when the record needs one."],
-      ["i-filter", "Check", "Line type, do-not-call and duplicates, before anything is queued."],
-      ["i-phone", "Call list ready", "Ranked for your reps. The first touch is a call, made by a person.", true]
-    ]
+      ["i-radar", "Skip trace", "Tracerfy finds a direct mobile, only when the record needs one."],
+      ["i-filter", "Auto-tag", "Every lead is tagged on arrival: source, segment, area and fit. Line type, do-not-call and duplicates are checked."]
+    ],
+    ready: { title: "Ready to launch", text: "Skip traced, auto-tagged and staged as held blocks. The first touch is a call, made by a person.",
+      chans: ["Call lists", "Contact Center", "Dialer", "Initial SMS blocks", "Any outreach campaign"], hand: READY_HAND, next: "#b2b-start", label: "See the first touch" }
   }
 };
 
@@ -1706,9 +1738,9 @@ const city = (() => {
   const stage = $("[data-de-stage]", sec), canvas = $("[data-city]", sec),
         countEl = $("[data-de-count]", sec), labelEl = $("[data-de-label]", sec), whereEl = $("[data-de-where]", sec),
         catsEl = $("[data-de-cats]", sec), railEl = $("[data-de-rail]", sec), srcEl = $("[data-de-src]", sec),
-        titleEl = $("[data-de-title]", sec), introEl = $("[data-de-intro]", sec);
+        titleEl = $("[data-de-title]", sec), introEl = $("[data-de-intro]", sec), stopEl = $("[data-de-stop]", sec);
   const nf = new Intl.NumberFormat("en-US");
-  let data = DE.re, catIdx = 0;
+  let data = DE.re, catIdx = 0, engine = null;
 
   function buildScene() {
     const T = window.THREE;
@@ -1840,8 +1872,90 @@ const city = (() => {
     return { select };
   }
 
-  const gl = buildScene();
-  if (!gl) stage.classList.add("nogl");
+  // Real 3D map (Mapbox Standard, night) when a public token is present; the
+  // drawn WebGL city otherwise, and as the fallback if the map can't load.
+  function buildMap() {
+    const mb = window.mapboxgl, token = window.NX_MAPBOX;
+    if (!mb || !token) return null;
+    try { if (typeof mb.supported === "function" && !mb.supported()) return null; } catch (e) { return null; }
+    const box = document.createElement("div");
+    box.className = "de-map";
+    stage.insertBefore(box, stage.firstChild);
+    let map;
+    try {
+      mb.accessToken = token;
+      map = new mb.Map({ container: box, style: "mapbox://styles/mapbox/standard", center: data.overview.center, zoom: data.overview.zoom, pitch: 52, bearing: -16, cooperativeGestures: true });
+    } catch (e) { box.remove(); return null; }
+    let ready = false, dead = false, sel = null, pins = [], timer = 0, k = -1, held = 0;
+    const fail = () => {
+      if (dead) return;
+      dead = true; clearTimeout(timer);
+      try { map.remove(); } catch (e) { }
+      box.remove(); stage.classList.remove("has-map");
+      engine = buildScene();
+      if (!engine) stage.classList.add("nogl");
+      pick(catIdx);
+    };
+    map.on("style.load", () => {
+      try {
+        map.setConfigProperty("basemap", "lightPreset", "night");
+        map.setConfigProperty("basemap", "showPointOfInterestLabels", false);
+        map.setConfigProperty("basemap", "showTransitLabels", false);
+      } catch (e) { }
+    });
+    map.on("load", () => { if (dead) return; ready = true; stage.classList.add("has-map"); if (sel) tour(); });
+    map.on("error", e => {
+      const err = (e && e.error) || {};
+      const why = String(err.status || "") + " " + String(err.message || "");
+      (window.__deMapErrors = window.__deMapErrors || []).push(why.trim().slice(0, 140));
+      if (!ready && /(401|403)|unauthorized|forbidden|style/i.test(why)) fail();
+    });
+    setTimeout(() => { if (!ready) fail(); }, 20000);
+    ["mousedown", "touchstart", "wheel"].forEach(ev => box.addEventListener(ev, () => { held = performance.now(); }, { passive: true }));
+    const move = opts => (reduce ? map.jumpTo(opts) : map.flyTo(Object.assign({ duration: 5200, curve: 1.4, essential: true }, opts)));
+    function tour() {
+      clearTimeout(timer);
+      pins.forEach(p => p.marker.remove());
+      pins = [];
+      k = -1;
+      (sel.c.places || []).forEach(([name, at, n]) => {
+        const el = document.createElement("div");
+        el.className = "de-pin";
+        el.innerHTML = "<b></b><i></i>";
+        el.firstChild.textContent = n ? name + " · " + nf.format(n) : name;
+        pins.push({ el, marker: new mb.Marker({ element: el, anchor: "bottom" }).setLngLat(at).addTo(map) });
+      });
+      step();
+    }
+    function step() {
+      if (dead || !sel) return;
+      if (performance.now() - held < 12000) { timer = setTimeout(step, 2500); return; }
+      const places = sel.c.places || [];
+      k = (k + 1) % (places.length + 1);
+      pins.forEach((p, i) => p.el.classList.toggle("on", i === k));
+      if (k === places.length) {
+        move({ center: data.overview.center, zoom: data.overview.zoom, pitch: 50, bearing: -16 });
+        stopEl.textContent = data.overview.label;
+      } else {
+        const [name, at, n] = places[k];
+        move({ center: at, zoom: 15.6, pitch: 68, bearing: ((k * 70 + 20) % 360) - 180 });
+        stopEl.textContent = n ? (name + " · " + nf.format(n) + " " + (sel.c.unit || "")).trim() : name;
+      }
+      if (!reduce) timer = setTimeout(step, 8200);
+    }
+    return {
+      select(c, i, cb) {
+        sel = { c };
+        const t0 = performance.now();
+        const run = now => { const f = Math.min(1, (now - t0) / 1600); cb(f); if (f < 1) requestAnimationFrame(run); };
+        if (reduce) cb(1); else requestAnimationFrame(run);
+        if (ready) tour();
+      }
+    };
+  }
+
+  engine = buildMap() || buildScene();
+  if (!engine) stage.classList.add("nogl");
 
   function pick(i) {
     catIdx = i;
@@ -1849,8 +1963,9 @@ const city = (() => {
     const c = data.cats[i];
     labelEl.textContent = c.l;
     countEl.hidden = !c.n;
-    if (gl) gl.select(c, i, f => { if (c.n) countEl.textContent = nf.format(Math.round(c.n * f)); });
-    else if (c.n) countEl.textContent = nf.format(c.n);
+    stopEl.textContent = "";
+    const cb = f => { if (c.n) countEl.textContent = nf.format(Math.round(c.n * f)); };
+    if (engine) engine.select(c, i, cb); else cb(1);
   }
   function render() {
     whereEl.textContent = data.where; titleEl.textContent = data.title;
@@ -1863,9 +1978,11 @@ const city = (() => {
       b.addEventListener("click", () => pick(i));
       catsEl.appendChild(b);
     });
-    railEl.innerHTML = data.rail.map(([ic, b, p, ready]) => ready
-      ? `<li class="ready"><span class="ib">${icon(ic)}</span><small>The engine stops here</small><b>${esc(b)}</b><p>${esc(p)}</p><a class="btn btn-primary btn-sm" href="${data.next}">${esc(data.nextLabel)} <span aria-hidden="true">↓</span></a></li>`
-      : `<li><span class="ib">${icon(ic)}</span><b>${esc(b)}</b><p>${esc(p)}</p></li>`).join("");
+    const r = data.ready;
+    railEl.innerHTML = data.steps.map(([ic, b, p]) => `<li><span class="ib">${icon(ic)}</span><b>${esc(b)}</b><p>${esc(p)}</p></li>`).join("")
+      + `<li class="ready"><span class="bound">The boundary</span><span class="ib">${icon("i-msg")}</span><b>${esc(r.title)}</b><p>${esc(r.text)}</p>`
+      + `<div class="de-chan">${r.chans.map(x => `<span>${esc(x)}</span>`).join("")}</div><p class="de-hand">${esc(r.hand)}</p>`
+      + `<a class="btn btn-primary btn-sm" href="${r.next}">${esc(r.label)} <span aria-hidden="true">↓</span></a></li>`;
     pick(0);
   }
   render();
