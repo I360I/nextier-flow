@@ -2060,6 +2060,22 @@ route(true);
 })();
 </script>
 
+<!-- Force the hero mascot clips to actually play (Chrome won't always honor the autoplay attr on a cross-origin, blended video). -->
+<script>
+(function () {
+  function kick() {
+    document.querySelectorAll('.mascot-video video').forEach(function (v) {
+      v.muted = true; v.defaultMuted = true;
+      var p = v.play(); if (p && p.catch) p.catch(function () {});
+    });
+  }
+  if (document.readyState !== 'loading') kick(); else document.addEventListener('DOMContentLoaded', kick);
+  window.addEventListener('load', kick);
+  document.addEventListener('pointerdown', kick, { once: true });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) kick(); });
+})();
+</script>
+
 <!-- Live agent: "Start the call" talks to a real CloudGreet demo agent in-browser,
      with the scripted sample as an automatic fallback (mic denied / error). -->
 <style>
