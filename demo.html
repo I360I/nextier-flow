@@ -130,6 +130,9 @@ h1{font:700 clamp(36px,5.4vw,64px)/1.02 var(--display);letter-spacing:-.025em;ma
 .f-book span{font-size:15px;color:#27324f}
 .f-book .booked{background:var(--blue);color:#fff;font:700 13px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;border-radius:999px;padding:9px 12px;margin-left:6px}
 @media (max-width:520px){.float{padding:9px 11px;gap:8px}.f-book b{font-size:15px}.f-book span{font-size:13px}.f-book .booked{display:none}}
+.hero-art .mslot.mascot-video{overflow:hidden;border-radius:50%;isolation:isolate;background:#2f6fc2;filter:drop-shadow(0 26px 44px rgba(59,140,255,.45))}
+.hero-art .mslot.mascot-video video{width:100%;height:100%;object-fit:cover;object-position:88% 32%;transform:scale(1.08);display:block;mix-blend-mode:multiply;-webkit-mask-image:radial-gradient(circle at 50% 44%,#000 46%,rgba(0,0,0,.6) 62%,transparent 80%);mask-image:radial-gradient(circle at 50% 44%,#000 46%,rgba(0,0,0,.6) 62%,transparent 80%)}
+.hero-art .mslot.mascot-video::after{content:"";position:absolute;inset:0;border-radius:50%;pointer-events:none;background:radial-gradient(circle at 50% 44%,transparent 40%,rgba(10,22,38,.6) 66%,rgba(10,22,38,.98) 100%)}
 .roles{list-style:none;margin-block:0;padding-block:6px 30px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
 .role{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:16px;display:flex;gap:12px;align-items:flex-start;min-width:0}
 .role+.role::before{content:"";position:absolute;left:-16px;top:38px;width:16px;height:2px;background:linear-gradient(90deg,var(--blue),var(--orange))}
@@ -670,7 +673,7 @@ figcaption{font-size:14px;color:var(--fg-3)}
     <div class="hero-art">
       <div class="halo"></div>
       <svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="48"/></svg>
-      <div class="mslot" data-mascot="hero"></div>
+      <div class="mslot mascot-video"><video autoplay loop muted playsinline><source src="https://cloudgreet.com/talk-hvac.mp4" type="video/mp4"></video></div>
       <div class="float f-reply"><span class="tagpill tag-pos"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>Positive reply</span><span class="f-sub">Classified · Prioritized · Routed</span></div>
       <div class="float f-book"><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg><div><small>Focus Calendar</small><b>15-minute discovery</b><span>Tomorrow · 10:00 AM</span></div><span class="booked">Booked</span></div>
     </div>
@@ -814,7 +817,7 @@ figcaption{font-size:14px;color:var(--fg-3)}
     <div class="hero-art">
       <div class="halo"></div>
       <svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="48"/></svg>
-      <div class="mslot" data-mascot="hero"></div>
+      <div class="mslot mascot-video"><video autoplay loop muted playsinline><source src="https://cloudgreet.com/talk-hvac.mp4" type="video/mp4"></video></div>
       <div class="float f-reply"><span class="tagpill tag-pos"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>Positive reply</span><span class="f-sub">Classified · Prioritized · Routed</span></div>
       <div class="float f-book"><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg><div><small>Focus Calendar</small><b>Discovery call</b><span>Thursday · 11:00 AM</span></div><span class="booked">Booked</span></div>
     </div>
@@ -900,7 +903,7 @@ figcaption{font-size:14px;color:var(--fg-3)}
     <div class="hero-art">
       <div class="halo"></div>
       <svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="48"/></svg>
-      <div class="mslot" data-mascot="hero"></div>
+      <div class="mslot mascot-video"><video autoplay loop muted playsinline><source src="https://cloudgreet.com/talk-hvac.mp4" type="video/mp4"></video></div>
       <div class="float f-reply"><span class="tagpill tag-pos"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>Positive reply</span><span class="f-sub">Classified · Prioritized · Routed</span></div>
       <div class="float f-book"><svg class="ic" aria-hidden="true"><use href="#i-bag"/></svg><div><small>Store calendar</small><b>Pickup hold</b><span>Today · until 6:00 PM</span></div><span class="booked">Held</span></div>
     </div>
