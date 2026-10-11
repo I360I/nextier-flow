@@ -365,6 +365,7 @@ h3{font:700 21px/1.25 var(--display);margin:0}
 @media (max-width:920px){.price{grid-template-columns:minmax(0,1fr)}}
 .pcard{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:8px}
 .pcard small{font:700 12.5px/1.3 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--blue-2)}
+.pcard .pc-t{font:700 26px/1.15 var(--display)}
 .pcard .amt{font:700 46px/1 var(--display);letter-spacing:-.02em}
 .pcard .per{font-size:16px;color:var(--fg-2)}
 .pcard p{margin:6px 0 0;font-size:16px;color:var(--fg-2)}
@@ -501,7 +502,7 @@ figcaption{font-size:14px;color:var(--fg-3)}
 
 <script type="application/ld+json">
 [{"@context":"https://schema.org","@type":"Organization","name":"Nextier","url":"https://www.nxtier.ai","logo":"https://www.nxtier.ai/nextier-logo.jpg","description":"Nextier is a revenue execution engine: it starts conversations by text and call, sorts every reply, answers inbound calls with a digital assistant powered by CloudGreet, and books appointments for your team."},
-{"@context":"https://schema.org","@type":"Service","name":"Real Estate Agent OS","serviceType":"Real estate lead generation and appointment setting software for brokerages","provider":{"@type":"Organization","name":"Nextier","url":"https://www.nxtier.ai"},"areaServed":"US","audience":{"@type":"BusinessAudience","audienceType":"Real estate brokerages"},"offers":[{"@type":"Offer","name":"Installation","price":"10000","priceCurrency":"USD"},{"@type":"Offer","name":"Management","priceSpecification":{"@type":"UnitPriceSpecification","price":"5000","priceCurrency":"USD","unitText":"MONTH"}},{"@type":"Offer","name":"Agent seat","priceSpecification":{"@type":"UnitPriceSpecification","price":"100","priceCurrency":"USD","unitText":"MONTH","referenceQuantity":{"@type":"QuantitativeValue","value":"1","unitText":"seat"}}}]},
+{"@context":"https://schema.org","@type":"Service","name":"Real Estate Agent OS","serviceType":"Real estate lead generation and appointment setting software for brokerages","provider":{"@type":"Organization","name":"Nextier","url":"https://www.nxtier.ai"},"areaServed":"US","audience":{"@type":"BusinessAudience","audienceType":"Real estate brokerages"}},
 {"@context":"https://schema.org","@type":"Service","name":"Digital Receptionist for B2B","serviceType":"AI receptionist and appointment setting for B2B sales teams","provider":{"@type":"Organization","name":"Nextier","url":"https://www.nxtier.ai"},"areaServed":"US"},
 {"@context":"https://schema.org","@type":"Service","name":"Customer Service Assistant for Retail","serviceType":"AI customer service for retail stores: calls, texts, holds and appointments","provider":{"@type":"Organization","name":"Nextier","url":"https://www.nxtier.ai"},"areaServed":"US"},
 {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
@@ -509,7 +510,7 @@ figcaption{font-size:14px;color:var(--fg-3)}
 {"@type":"Question","name":"How does the first text work?","acceptedAnswer":{"@type":"Answer","text":"It is one short, personal question from a registered business number, with opt-out language. No pitch and no link. A reply of STOP is honored immediately and blocks every future send to that number."}},
 {"@type":"Question","name":"Does the digital assistant pretend to be a person?","acceptedAnswer":{"@type":"Answer","text":"No. It introduces itself as a digital assistant, captures the details, books the appointment and hands the caller to a person when they ask for one or when the call needs one."}},
 {"@type":"Question","name":"Who talks to the leads?","acceptedAnswer":{"@type":"Answer","text":"Your people. The system starts conversations, sorts the replies and books the time. A person decides the next step on every hot lead."}},
-{"@type":"Question","name":"What does a brokerage pay for the Real Estate Agent OS?","acceptedAnswer":{"@type":"Answer","text":"$10,000 for installation, $5,000 a month for management, and $100 a month per agent seat. Your brokerage sets what it charges its agents."}},
+{"@type":"Question","name":"How does a brokerage roll it out?","acceptedAnswer":{"@type":"Answer","text":"We install it in your brokerage's own accounts, connect your CRM and manage it every week. Each agent gets a seat with the full toolbox and a digital assistant."}},
 {"@type":"Question","name":"Which CRMs does Nextier work with?","acceptedAnswer":{"@type":"Answer","text":"Zoho CRM, Salesforce, HubSpot, HighLevel and Follow Up Boss."}},
 {"@type":"Question","name":"What powers Nextier?","acceptedAnswer":{"@type":"Answer","text":"Property data from RealEstateAPI, contact data from Tracerfy and USBizData, sourcing through Apify, messaging and voice on SignalHouse, inbound calls answered by CloudGreet, and AI from Anthropic and OpenAI."}}
 ]}]
@@ -762,15 +763,15 @@ figcaption{font-size:14px;color:var(--fg-3)}
     </div>
   </section>
 
-  <section class="wrap step" id="re-pricing" aria-labelledby="re-pricing-h">
+  <section class="wrap step" id="re-brokerage" aria-labelledby="re-brokerage-h">
     <div class="step-head">
-      <h2 class="step-h" id="re-pricing-h"><span class="n">06 /</span> <span class="b-or">Brokerage</span> <span class="k">pricing</span></h2>
+      <h2 class="step-h" id="re-brokerage-h"><span class="n">06 /</span> <span class="b-or">Your brokerage</span> <span class="k">runs it</span></h2>
     </div>
-    <p class="intro">Built for brokerages that want to hand their agents a real pipeline. You pay for the install and the management. Seats are where your brokerage earns.</p>
+    <p class="intro">Built for brokerages that want to hand every agent a real pipeline, installed once and managed for you.</p>
     <div class="price">
-      <div class="pcard"><small>Installation</small><span class="amt">$10,000</span><span class="per">one time</span><p>Set up in your brokerage's own accounts: your numbers, your data and your CRM connection.</p></div>
-      <div class="pcard"><small>Management</small><span class="amt">$5,000</span><span class="per">per month</span><p>We run it, tune the messaging and report results to you every week.</p></div>
-      <div class="pcard seat"><small>Agent seats</small><span class="amt">$100</span><span class="per">per seat, per month</span><p>Each seat includes the full toolbox and a digital assistant. Charge your agents whatever you choose. The margin is yours.</p></div>
+      <div class="pcard"><small>Installed</small><b class="pc-t">In your accounts</b><p>Your numbers, your data and your CRM connection, set up in your brokerage's name.</p></div>
+      <div class="pcard"><small>Managed</small><b class="pc-t">Every week</b><p>We run it, tune the messaging and report results to you every week.</p></div>
+      <div class="pcard seat"><small>Agent seats</small><b class="pc-t">One for every agent</b><p>Each seat includes the full toolbox and a digital assistant. You decide how to offer it to your agents.</p></div>
     </div>
     <p class="own"><b>Your brokerage owns it.</b> The accounts, phone numbers and data sit in your name. Nextier installs it and manages it for you.</p>
   </section>
@@ -1061,7 +1062,7 @@ figcaption{font-size:14px;color:var(--fg-3)}
     <details><summary>How does the first text work?</summary><p>It is one short, personal question from a registered business number, with opt-out language. No pitch and no link. A reply of STOP is honored immediately and blocks every future send to that number.</p></details>
     <details><summary>Does the digital assistant pretend to be a person?</summary><p>No. It introduces itself as a digital assistant, captures the details, books the appointment and hands the caller to a person when they ask for one or when the call needs one.</p></details>
     <details><summary>Who talks to the leads?</summary><p>Your people. The system starts conversations, sorts the replies and books the time. A person decides the next step on every hot lead.</p></details>
-    <details><summary>What does a brokerage pay for the Real Estate Agent OS?</summary><p>$10,000 for installation, $5,000 a month for management, and $100 a month per agent seat. Your brokerage sets what it charges its agents.</p></details>
+    <details><summary>How does a brokerage roll it out?</summary><p>We install it in your brokerage's own accounts, connect your CRM and manage it every week. Each agent gets a seat with the full toolbox and a digital assistant.</p></details>
     <details><summary>Which CRMs does Nextier work with?</summary><p>Zoho CRM, Salesforce, HubSpot, HighLevel and Follow Up Boss.</p></details>
     <details><summary>What powers Nextier?</summary><p>Property data from RealEstateAPI, contact data from Tracerfy and USBizData, sourcing through Apify, messaging and voice on SignalHouse, inbound calls answered by CloudGreet, and AI from Anthropic and OpenAI.</p></details>
   </div>
