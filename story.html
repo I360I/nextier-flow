@@ -1,0 +1,410 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Nextier Story Mode</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=DM+Sans:wght@400;500;700&display=swap">
+<style>
+/* Layout: a stage (animated scene) beside a narration column, a chapter rail underneath; one chapter on screen at a time. Single committed dark look, matching the Nextier decks. */
+:root{
+  --bg:#070B18; --panel:#0F1630; --panel-2:#141D3D; --line:#26335F;
+  --fg:#FFFFFF; --soft:#D5DDF0; --orange:#FF8A3D; --orange-soft:#FFB27A;
+  --blue:#4C8DFF; --blue-soft:#9CC0FF; --green:#2FD39A; --ink:#0A1022;
+  --card-light:#F3F5FB; --ink-soft:#2B3350;
+  --display:'Space Grotesk', 'Trebuchet MS', Arial, sans-serif;
+  --body:'DM Sans', 'Segoe UI', Arial, sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:radial-gradient(circle at 70% 20%, #16234D 0%, var(--bg) 60%) fixed, var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:28px 40px;display:flex;flex-direction:column;gap:24px}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.08em}
+.brand span{color:var(--orange)}
+.tag{font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);border:1px solid var(--line);border-radius:999px;padding:6px 12px}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,4.4vw,52px);line-height:1.05;margin:0;text-wrap:balance}
+h1 em{font-style:normal;color:var(--orange)}
+.main{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:24px;align-items:stretch}
+@media (max-width:880px){.main{grid-template-columns:minmax(0,1fr)}}
+.stage{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:24px;min-height:460px;overflow:hidden}
+@media (max-width:520px){.stage{min-height:400px}}
+.narr{display:flex;flex-direction:column;gap:16px;padding:8px 4px;min-width:0}
+.step{font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--orange)}
+.narr h2{font-family:var(--display);font-size:clamp(26px,3vw,36px);line-height:1.1;margin:0;text-wrap:balance}
+.narr p{margin:0;font-size:19px;color:var(--fg);max-width:34ch}
+.who{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-size:14px;font-weight:700;padding:6px 12px;border-radius:999px;background:var(--panel-2);border:1px solid var(--line);color:var(--soft)}
+.controls{display:flex;flex-wrap:wrap;gap:10px;margin-top:auto}
+button{font:inherit;font-weight:700;font-size:15px;color:var(--fg);background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:10px 16px;cursor:pointer}
+button:hover{border-color:var(--blue)}
+button:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+#play{background:var(--orange);border-color:var(--orange);color:var(--ink);min-width:120px}
+.rail{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:6px}
+@media (max-width:1000px){.rail{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.rail button{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:10px;border-radius:12px;text-align:left;font-size:13px;color:var(--soft);min-width:0}
+.rail button .bar{display:block;width:100%;height:4px;border-radius:2px;background:var(--line);overflow:hidden}
+.rail button .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--orange))}
+.rail button.done .bar i{width:100%}
+.rail button[aria-current="step"]{color:var(--fg);border-color:var(--orange)}
+.rail .n{font-variant-numeric:tabular-nums;color:var(--orange)}
+.foot{font-size:14px;color:var(--soft)}
+
+/* scenes */
+.scene{position:absolute;inset:0;padding:28px;display:flex;align-items:center;justify-content:center}
+.scene[hidden]{display:none!important}
+.cards{display:flex;flex-direction:column;gap:14px;width:min(420px,100%)}
+.dcard{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:16px;background:var(--panel-2);border:1px solid var(--line)}
+.dcard b{display:block;font-size:13px;letter-spacing:.12em;text-transform:uppercase}
+.dcard span{font-size:17px}
+.dot{flex:none;width:14px;height:14px;border-radius:50%}
+.phone{width:min(320px,100%);height:400px;border-radius:40px;background:#0A0F22;border:2px solid var(--line);padding:56px 16px 16px;position:relative;display:flex;flex-direction:column;gap:12px;box-shadow:0 0 60px #4C8DFF22}
+.phone::before{content:"";position:absolute;top:16px;left:50%;width:110px;height:24px;margin-left:-55px;border-radius:12px;background:#03050C}
+.bub{max-width:82%;padding:12px 14px;border-radius:18px;font-size:16px;line-height:1.35}
+.bub.out{align-self:flex-end;background:var(--blue);color:var(--fg)}
+.bub.in{align-self:flex-start;background:#2A2F45;color:var(--fg)}
+.bub small{display:block;font-size:12px;font-weight:700;letter-spacing:.08em;opacity:.85;margin-bottom:2px}
+.typing{align-self:flex-start;display:flex;gap:6px;padding:12px 14px;border-radius:18px;background:#2A2F45}
+.typing i{width:8px;height:8px;border-radius:50%;background:var(--soft);animation:ty 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+.badge{position:absolute;padding:8px 14px;border-radius:999px;font-weight:700;font-size:14px;letter-spacing:.06em}
+.loop{position:relative;width:min(380px,90%);aspect-ratio:16/10;border:3px solid var(--blue);border-radius:8px;box-shadow:0 0 30px #4C8DFF44;max-width:100%}
+.loop .lbl{position:absolute;font-size:13px;font-weight:700;letter-spacing:.16em;color:var(--blue-soft)}
+.loop .ld{position:absolute;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;background:var(--orange-soft);box-shadow:0 0 18px 6px var(--orange)}
+.wave{display:flex;align-items:center;gap:6px;height:120px}
+.wave i{width:8px;border-radius:4px;background:linear-gradient(var(--blue),var(--orange));animation:wv 1.1s ease-in-out infinite}
+.inbox{position:relative;width:min(400px,100%);height:300px}
+.inbox .cold{position:absolute;left:24px;right:24px;height:60px;border-radius:14px;background:#141B33;border:1px solid #1E2848;color:#7D88A8;font-size:15px;display:flex;align-items:center;padding:0 16px}
+.warm{position:absolute;left:0;right:0;top:110px;padding:18px;border-radius:18px;background:#1C1410;border:2px solid var(--orange);box-shadow:0 0 40px #FF8A3D55;display:flex;flex-direction:column;gap:10px}
+.warm .row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.approve{background:var(--orange);color:var(--ink);border-radius:10px;padding:8px 14px;font-weight:700;font-size:14px}
+.cal{width:min(400px,100%);background:var(--card-light);color:var(--ink);border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:8px;box-shadow:0 0 60px #4C8DFF44}
+.cal small{font-size:12px;font-weight:700;letter-spacing:.16em;color:#4C5675}
+.cal strong{font-family:var(--display);font-size:28px}
+.cal .row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;color:var(--ink-soft)}
+.booked{background:#2F6BFF;color:#FFFFFF;border-radius:999px;padding:6px 14px;font-weight:700;font-size:14px;letter-spacing:.08em}
+.grid{display:grid;grid-template-columns:repeat(10,1fr);gap:10px;width:min(380px,90%)}
+.grid i{aspect-ratio:1;border-radius:50%;background:#2A3350;animation:gl 3s ease-in-out infinite}
+
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.flow span{padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel-2)}
+.flow .nx{border-color:var(--orange);color:var(--orange-soft)}
+.flow i{font-style:normal;color:var(--soft)}
+.lp{display:flex;align-items:center;gap:14px;width:100%;justify-content:center}
+.trf{position:relative;width:90px;height:120px;flex:none}
+.trf i{position:absolute;left:0;width:10px;height:10px;border-radius:50%;background:var(--orange-soft);box-shadow:0 0 10px var(--orange);animation:tf 2s linear infinite;animation-delay:var(--d)}
+.trf i:nth-child(1){top:10px}.trf i:nth-child(2){top:35px}.trf i:nth-child(3){top:60px}.trf i:nth-child(4){top:85px}.trf i:nth-child(5){top:110px}
+@keyframes tf{0%{left:0;opacity:0}20%{opacity:1}100%{left:80px;opacity:0}}
+@media (max-width:560px){.trf{display:none}}
+.browser{width:min(380px,100%);border-radius:16px;background:var(--panel-2);border:1px solid var(--line);padding:0 14px 14px;display:flex;flex-direction:column;gap:8px;overflow:hidden}
+.bbar{display:flex;align-items:center;gap:6px;margin:0 -14px;padding:10px 14px;background:#0B1126;border-bottom:1px solid var(--line)}
+.bbar i{width:9px;height:9px;border-radius:50%;background:#3A4570}
+.bbar span{margin-left:8px;font-size:13px;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vsl{position:relative;height:100px;border-radius:12px;background:radial-gradient(circle at 30% 30%,#2A3A7A,#111934);display:flex;align-items:center;justify-content:center;margin-top:6px}
+.vsl b{position:absolute;left:12px;top:10px;font-size:13px;letter-spacing:.1em;text-transform:uppercase}
+.play{width:52px;height:52px;border-radius:50%;background:var(--orange);position:relative;box-shadow:0 0 24px #FF8A3D88}
+.play::after{content:"";position:absolute;left:21px;top:16px;border-left:16px solid var(--ink);border-top:10px solid transparent;border-bottom:10px solid transparent}
+.vbar{position:absolute;left:12px;right:12px;bottom:10px;height:4px;border-radius:2px;background:#3A4570;overflow:hidden}
+.vbar i{display:block;height:100%;width:0;background:var(--orange);animation:vb 6s linear infinite}
+@keyframes vb{to{width:100%}}
+.soc{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.soc span{padding:5px 9px;border-radius:999px;font-size:12px;font-weight:700;background:#1A2A55;border:1px solid var(--blue);color:var(--fg)}
+.post{padding:8px 12px;border-radius:10px;background:#0F1630;border:1px solid var(--line);font-size:15px;font-weight:700}
+.lnk{display:block;margin-top:6px;font-weight:700;text-decoration:underline;color:#E6EEFF}
+.tgt{display:flex;flex-direction:column;gap:12px;width:min(500px,100%)}
+.aud{display:flex;gap:6px;flex-wrap:wrap}
+.aud span{padding:8px 14px;border-radius:10px;font-size:14px;font-weight:700;background:var(--panel-2);border:1px solid var(--line);color:var(--soft);transition:all .3s}
+.aud span.on{background:#1A2A55;border-color:var(--blue);color:var(--fg)}
+.map{position:relative;height:200px;border-radius:16px;border:1px solid var(--line);overflow:hidden;background:radial-gradient(ellipse 70% 55% at 55% 50%,#1B2550 0%,#121935 60%,#0B1126 100%)}
+.map .fd{position:absolute;width:4px;height:4px;border-radius:50%;background:#5A6A99}
+.cl{position:absolute;width:var(--s);height:var(--s);margin:calc(var(--s)/-2) 0 0 calc(var(--s)/-2);border-radius:50%;background:#4C8DFF33;border:2px solid var(--blue);box-shadow:0 0 24px #4C8DFF66;animation:cp 2.4s ease-in-out infinite}
+.cl b{position:absolute;left:50%;top:calc(100% + 4px);transform:translateX(-50%);white-space:nowrap;font-size:13px;font-weight:700;color:var(--fg);text-shadow:0 1px 4px #000}
+.segs{display:flex;flex-wrap:wrap;gap:6px}
+.segs span{padding:6px 10px;border-radius:8px;font-size:13px;font-weight:700;background:var(--panel-2);border:1px solid var(--line);color:var(--fg)}
+.segs span:first-child{border-color:var(--orange);color:var(--orange-soft)}
+.rule{font-size:13px;font-weight:700;letter-spacing:.06em;color:var(--blue-soft)}
+@keyframes cp{50%{transform:scale(1.12);box-shadow:0 0 36px #4C8DFF99}}
+.tri{display:flex;flex-direction:column;gap:12px;width:min(480px,100%)}
+.steps{display:flex;flex-wrap:wrap;gap:6px}
+.st{flex:1 1 auto;text-align:center;padding:8px 10px;border-radius:999px;font-size:13px;font-weight:700;letter-spacing:.06em;background:var(--panel-2);border:1px solid var(--line);color:var(--soft)}
+.go .st{animation:lit .5s ease-out both var(--d)}
+.chrow{display:flex;flex-wrap:wrap;gap:6px;font-size:13px;font-weight:700;color:var(--blue-soft)}
+.chrow span{padding:4px 10px;border-radius:8px;border:1px dashed #3A4570}
+.rq{position:relative;display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:var(--panel-2);border:1px solid var(--line)}
+.rq>div{flex:1;min-width:0}.rq b{display:block;font-size:16px}.rq small{font-size:14px;color:var(--soft)}
+.rk{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:700;background:var(--line);font-variant-numeric:tabular-nums}
+.tg{flex:none;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 10px;border-radius:999px}
+.tg.hot{background:var(--orange);color:var(--ink)}.tg.warm{background:var(--blue);color:var(--fg)}.tg.later{background:#3A4570;color:var(--fg)}
+.rq:first-of-type{}
+.pushed{position:absolute;right:10px;top:-14px;font-size:12px;font-weight:700;letter-spacing:.08em;padding:5px 10px;border-radius:999px;background:var(--green);color:var(--ink)}
+.go .pushed{animation:pop .45s cubic-bezier(.2,1.4,.4,1) both 3.3s}
+.go .tg{animation:pop .4s cubic-bezier(.2,1.4,.4,1) both 2.2s}
+@keyframes lit{0%{background:var(--panel-2);color:var(--soft)}100%{background:#2A1A10;border-color:var(--orange);color:var(--fg);box-shadow:0 0 14px #FF8A3D55}}
+.oh{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:16px;width:100%;align-items:start}
+@media (max-width:560px){.oh{grid-template-columns:minmax(0,1fr)}.mess{display:none}}
+.ohl{display:block;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);margin-bottom:6px}
+.mess{display:flex;flex-direction:column;gap:12px;padding:14px;border-radius:16px;border:1px dashed #3A4570;opacity:.75}
+.mc{display:block;padding:10px 12px;border-radius:10px;background:#141B33;color:#9AA4C2;font-size:15px}
+.lanes{display:flex;flex-direction:column;gap:10px;min-width:0}
+.lane{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-radius:12px;background:var(--panel-2);border:1px solid var(--line);font-weight:700;font-size:16px;overflow:hidden}
+.lane em{font-style:normal;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue-soft);flex:none}
+.lane.hot{border-color:var(--orange);box-shadow:0 0 24px #FF8A3D44}
+.lane .inc{position:absolute;top:50%;width:14px;height:14px;margin-top:-7px;border-radius:50%;background:var(--orange-soft);box-shadow:0 0 14px 4px var(--orange);left:-20px;opacity:0}
+.go .lane .inc{animation:inc 1.2s ease-out both 1.4s}
+.ohr{max-width:100%;align-self:flex-end;margin-top:6px}
+.go .ohr{animation:pop .45s cubic-bezier(.2,1.4,.4,1) both 3.4s}
+.lane span{min-width:0}
+@keyframes inc{0%{left:-20px;opacity:1}80%{left:calc(100% - 40px);opacity:1}100%{left:calc(100% - 40px);opacity:0}}
+.chans{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;width:min(440px,100%)}
+.ch{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:14px;background:var(--panel-2);border:1px solid var(--line);font-weight:700;font-size:17px;min-width:0}
+.tw{position:relative;margin-left:auto;width:54px;height:4px;border-radius:2px;background:var(--line);flex:none}
+.tw::before,.tw::after{content:"";position:absolute;top:-4px;width:12px;height:12px;border-radius:50%}
+.tw::before{background:var(--blue-soft);box-shadow:0 0 10px var(--blue);animation:rt 1.6s linear infinite}
+.tw::after{background:var(--orange-soft);box-shadow:0 0 10px var(--orange);animation:lt 1.6s linear infinite}
+.pushwrap{display:flex;flex-direction:column;align-items:center;gap:12px}
+.pushwrap b{font-size:16px;letter-spacing:.06em}
+.push{position:relative;width:92px;height:92px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFD2B0,var(--orange) 50%,#B4480F);box-shadow:0 8px 0 #7A2E08,0 0 40px #FF8A3D88}
+.push .ring{position:absolute;inset:0;border-radius:50%;border:3px solid var(--orange)}
+.go .push{animation:press .5s ease-in-out both 2.4s}
+.go .push .ring{animation:ripple 1s ease-out both 2.6s}
+.go .joined{animation:pop .45s cubic-bezier(.2,1.4,.4,1) both 3s}
+@keyframes rt{from{left:0}to{left:42px}}
+@keyframes lt{from{left:42px}to{left:0}}
+@keyframes press{0%,100%{transform:none;box-shadow:0 8px 0 #7A2E08,0 0 40px #FF8A3D88}50%{transform:translateY(7px);box-shadow:0 1px 0 #7A2E08,0 0 70px #FF8A3DCC}}
+@keyframes ripple{from{transform:scale(1);opacity:.9}to{transform:scale(1.9);opacity:0}}
+/* entrance motion: elements rest visible; .go restarts their entrance */
+.go .in1{animation:up .5s ease-out both .1s}.go .in2{animation:up .5s ease-out both .9s}
+.go .in3{animation:up .5s ease-out both 1.7s}.go .in4{animation:up .5s ease-out both 2.5s}
+.go .pop{animation:pop .45s cubic-bezier(.2,1.4,.4,1) both 2.2s}
+.go .ld{animation:lp 4s linear infinite}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+@keyframes ty{0%,60%,100%{transform:none;opacity:.5}30%{transform:translateY(-5px);opacity:1}}
+@keyframes wv{0%,100%{height:14px}50%{height:110px}}
+@keyframes lp{0%{left:0;top:0}25%{left:100%;top:0}50%{left:100%;top:100%}75%{left:0;top:100%}100%{left:0;top:0}}
+@keyframes gl{0%,100%{background:#2A3350;box-shadow:none}50%{background:var(--orange-soft);box-shadow:0 0 14px 3px var(--orange)}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand">NEXT<span>IER</span></div>
+    <div class="tag">Story mode · Illustrative example</div>
+  </header>
+  <h1>One reply, from first text to <em>booked meeting.</em></h1>
+
+  <div class="main">
+    <div class="stage" id="stage" aria-live="polite">
+
+      <div class="scene" data-s="target">
+        <div class="tgt">
+          <div class="aud" id="aud"><span data-a="0">Real estate</span><span data-a="1">B2B</span><span data-a="2">B2C</span></div>
+          <div class="map in1" id="map">
+            <span class="cl" style="left:66%;top:30%;--s:74px"><b></b></span>
+            <span class="cl" style="left:58%;top:68%;--s:58px"><b></b></span>
+            <span class="cl" style="left:26%;top:46%;--s:46px"><b></b></span>
+          </div>
+          <div class="segs in2" id="segs"></div>
+          <div class="rule in3">Decision-makers first · entities go to research · new signals every morning</div>
+        </div>
+      </div>
+
+      <div class="scene" data-s="0" hidden>
+        <div class="cards">
+          <div class="flow in1"><span>Source</span><i>→</i><span>Enrich</span><i>→</i><span class="nx">Initiate conversation</span></div>
+          <div class="dcard in1"><div class="dot" style="background:var(--green)"></div><div><b style="color:var(--green)">Apify · Source</b><span>Two-family home, 24 Maple Ave</span></div></div>
+          <div class="dcard in2"><div class="dot" style="background:var(--blue)"></div><div><b style="color:var(--blue-soft)">RealEstateAPI · Enrich</b><span>Owner Linda R. · owned 14 years</span></div></div>
+          <div class="dcard in3"><div class="dot" style="background:#C77DFF"></div><div><b style="color:#D2A8FF">Tracerfy · Enrich</b><span>Mobile number verified</span></div></div>
+        </div>
+      </div>
+
+      <div class="scene" data-s="1" hidden>
+        <div class="phone">
+          <div class="typing in1" style="align-self:flex-end"><i></i><i></i><i></i></div>
+          <div class="bub out in2"><small>NEXTIER · VIA SIGNALHOUSE.IO</small>Hi Linda, would a simple plan for your property be helpful?<span class="lnk">yoursite.com/24-maple</span></div>
+        </div>
+      </div>
+
+      <div class="scene" data-s="page" hidden>
+        <div class="lp">
+          <div class="trf in1" aria-hidden="true"><i style="--d:0s"></i><i style="--d:.4s"></i><i style="--d:.8s"></i><i style="--d:1.2s"></i><i style="--d:1.6s"></i></div>
+          <div class="browser in1">
+            <div class="bbar"><i></i><i></i><i></i><span>yoursite.com/24-maple</span></div>
+            <div class="vsl"><span class="play"></span><b>Your VSL</b><div class="vbar"><i></i></div></div>
+            <b class="ohl" style="margin:4px 0 0">Automated blog</b>
+            <div class="post in2">Neighborhood pulse · October</div>
+            <div class="post in3">What your home could sell for</div>
+            <div class="post in4">Market report · this month</div>
+            <div class="soc in4"><span>Instagram</span><span>LinkedIn</span><span>YouTube</span><span>Facebook</span><span>TikTok</span><span>Link in bio</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="scene" data-s="2" hidden>
+        <div class="phone">
+          <div class="bub out"><small>NEXTIER</small>Hi Linda, would a simple plan for your property be helpful?</div>
+          <div class="typing in1"><i></i><i></i><i></i></div>
+          <div class="bub in in2"><small>LINDA</small>Yes, maybe. What would that look like?</div>
+        </div>
+        <div class="badge pop" style="right:24px;top:24px;background:var(--green);color:var(--ink)">Positive reply</div>
+      </div>
+
+      <div class="scene" data-s="3" hidden>
+        <div class="tri">
+          <div class="steps">
+            <span class="st" style="--d:.2s">Handle</span><span class="st" style="--d:.8s">Qualify</span><span class="st" style="--d:1.4s">Classify</span><span class="st" style="--d:2s">Prioritize</span><span class="st" style="--d:2.6s">Push</span>
+          </div>
+          <div class="chrow in1"><span>Text</span><span>Voice</span><span>Email</span><span>Chat</span></div>
+          <div class="rq in2"><span class="rk">1</span><div><b>Linda R. · Text</b><small>Selling this year</small></div><span class="tg hot">Hot</span><span class="pushed">Pushed to operator</span></div>
+          <div class="rq in3"><span class="rk">2</span><div><b>New caller · Voice</b><small>Thinking about next year</small></div><span class="tg warm">Warm</span></div>
+          <div class="rq in4"><span class="rk">3</span><div><b>Web chat</b><small>Just browsing</small></div><span class="tg later">Later</span></div>
+        </div>
+      </div>
+
+      <div class="scene" data-s="4" hidden>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:20px">
+          <div class="dcard in1" style="width:min(360px,100%)"><div class="dot" style="background:var(--blue)"></div><div><b style="color:var(--blue-soft)">Inbound call · CloudGreet</b><span>Linda calls back</span></div></div>
+          <div class="wave in2" id="wave"></div>
+          <div class="dcard in3" style="width:min(360px,100%);border-color:var(--orange)"><div class="dot" style="background:var(--orange)"></div><div><b style="color:var(--orange-soft)">Routed</b><span>To Mike, the listing agent</span></div></div>
+        </div>
+      </div>
+
+      <div class="scene" data-s="listing" hidden>
+        <div class="oh">
+          <div class="mess in1">
+            <b class="ohl">Without it: one pile</b>
+            <span class="mc" style="transform:rotate(-6deg)">Call · which house?</span>
+            <span class="mc" style="transform:rotate(4deg)">Text · is it still open?</span>
+            <span class="mc" style="transform:rotate(-3deg)">Voicemail · no address</span>
+            <span class="mc" style="transform:rotate(7deg)">Call · open house time?</span>
+          </div>
+          <div class="lanes in2">
+            <b class="ohl" style="color:var(--orange)">With Nextier: a line for every purpose</b>
+            <div class="lane hot"><span>Open house · 18 Oak St</span><em>Own line</em><i class="inc"></i></div>
+            <div class="lane"><span>Referral line</span><em>Own line</em><i class="inc" style="animation-delay:1.9s"></i></div>
+            <div class="lane"><span>Listing presentation request</span><em>Own line</em><i class="inc" style="animation-delay:2.3s"></i></div>
+            <div class="lane"><span>Market report + neighborhood pulse</span><em>Own line</em><i class="inc" style="animation-delay:2.7s"></i></div>
+            <div class="bub out ohr"><small>18 OAK ST</small>Open house is Saturday, 1–3 PM. Want me to save you a spot?</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="scene" data-s="human" hidden>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:26px;width:100%">
+          <div class="chans">
+            <div class="ch in1"><span class="dot" style="background:var(--green)"></span>Text<span class="tw"></span></div>
+            <div class="ch in1"><span class="dot" style="background:var(--blue)"></span>Voice<span class="tw"></span></div>
+            <div class="ch in2"><span class="dot" style="background:#C77DFF"></span>Email<span class="tw"></span></div>
+            <div class="ch in2"><span class="dot" style="background:var(--orange)"></span>Chat<span class="tw"></span></div>
+          </div>
+          <div class="pushwrap in3">
+            <span class="push" aria-hidden="true"><span class="ring"></span></span>
+            <b>Bring in a human</b>
+          </div>
+          <span class="chip joined" style="color:var(--fg);border-color:var(--orange)">Mike joined the conversation</span>
+        </div>
+      </div>
+
+      <div class="scene" data-s="5" hidden>
+        <div class="inbox">
+          <div class="cold" style="top:0">Cold list · 2,400 rows</div>
+          <div class="cold" style="top:40px;opacity:.7">Old leads · no reply</div>
+          <div class="warm in2">
+            <div class="row"><b style="font-size:14px;letter-spacing:.12em;color:var(--orange)">WARM REPLY</b><span class="chip">Qualified</span></div>
+            <div style="font-size:18px">Linda R. · 24 Maple Ave · wants to talk tomorrow</div>
+            <div class="row"><span style="color:var(--soft);font-size:15px">Suggested: 15-minute discovery</span><span class="approve pop">Approved</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="scene" data-s="6" hidden>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:18px;width:100%">
+          <div class="cal in1">
+            <small>FOCUS CALENDAR</small>
+            <strong>15-minute discovery</strong>
+            <div class="row"><span>Tomorrow · 10:00 AM</span><span class="booked pop">BOOKED</span></div>
+          </div>
+          <div class="who in3" style="justify-content:center"><span class="chip">CRM updated</span><span class="chip">Conversation logged</span></div>
+        </div>
+      </div>
+
+      <div class="scene" data-s="7" hidden>
+        <div class="grid in1" id="grid"></div>
+      </div>
+    </div>
+
+    <div class="narr">
+      <div class="step" id="step">Chapter 1 of 8</div>
+      <h2 id="ttl">Find the right person</h2>
+      <p id="txt"></p>
+      <div class="controls">
+        <button id="prev" type="button">Back</button>
+        <button id="play" type="button">Play story</button>
+        <button id="next" type="button">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="rail" id="rail" aria-label="Chapters"></nav>
+  <div class="foot">Illustrative story. Names, addresses and messages are examples. Use the arrow keys or the chapter buttons to move through it.</div>
+</div>
+
+<script>
+const CH=[
+ {k:'Target',t:'Start with the ideal target',x:'Pick the audience: real estate, B2B or B2C. The target layer maps where the best-fit decision-makers are, puts individual owners first and sends entities to research. New signals land every morning.'},
+ {k:'Source',t:'Source and enrich',x:'Apify sources the target. RealEstateAPI and Tracerfy enrich it with the owner and a verified mobile number. Next comes the conversation.'},
+ {k:'Initiate',t:'Initiate the conversation',x:'One respectful question, sent through SignalHouse.io on the channel Linda reads first. No pitch.'},
+ {k:'Page',t:'Traffic to your landing page',x:'The first text intentionally brings people to your landing page. Your VSL tells the story, your automated blog keeps publishing, and every social handle and link sits one tap away, so the page keeps drawing organic traffic.'},
+ {k:'Reply',t:'A positive reply',x:'Linda says yes to the conversation. That reply is what the system is built to produce.'},
+ {k:'Triage',t:'Every reply, sorted',x:'Across text, voice, email and chat, the first text and the first call are handled for you. Each inbound reply is qualified, classified and prioritized, and the best ones are pushed to the operator.'},
+ {k:'Call',t:'Linda calls back',x:'CloudGreet answers the call, picks up the context and routes her to the right person.'},
+ {k:'Lines',t:'A line for every purpose',x:'Open house, referrals, listing presentation requests, market reports and neighborhood pulse each get their own line. A buyer asking about Saturday’s open house at 18 Oak St gets that answer, not a pile of mixed calls for every listing.'},
+ {k:'Human',t:'Every channel, both ways',x:'Text, voice, email and chat all run two-way, in a human tone. When it matters, one push brings a real person into the conversation.'},
+ {k:'Operator',t:'The operator steps in',x:'Mike sees a warm, qualified reply at the top of his day, not a cold list. He approves the next step.'},
+ {k:'Book',t:'The meeting is booked',x:'A 15-minute discovery lands on the calendar. The CRM and the conversation log update on their own.'},
+ {k:'Multiply',t:'Now multiply it',x:'Positive replies in. Operators in front. Revenue out. Every add-on multiplies that capacity.'}
+];
+const DUR=7000;
+const AUD=[
+ ['Subdivision-size lots','Older homes on big lots','Vacant land','Estate and inherited','Expired listings','Commercial held 5+ years'],
+ ['Owner-operated businesses','Long-tenured owners','Multi-location operators','Succession-age owners','Recently expanded'],
+ ['New movers','Life-event signals','High-intent browsers','Lapsed customers','Local service seekers']
+];
+const audEls=[...document.querySelectorAll('#aud span')],segs=document.getElementById('segs'),cls=[...document.querySelectorAll('#map .cl b')];
+const mapEl=document.getElementById('map');for(let i=0;i<46;i++){const d=document.createElement('i');d.className='fd';d.style.left=(6+Math.random()*88)+'%';d.style.top=(8+Math.random()*84)+'%';mapEl.insertBefore(d,mapEl.firstChild)}
+let audI=0,audT=0;
+function showAud(i){audI=i;audEls.forEach((e,j)=>e.classList.toggle('on',j===i));segs.innerHTML='';AUD[i].forEach(s=>{const e=document.createElement('span');e.textContent=s;segs.appendChild(e)});cls.forEach((b,j)=>b.textContent=AUD[i][j])}
+audEls.forEach((e,j)=>e.addEventListener('click',()=>showAud(j)));
+showAud(0);
+const scenes=[...document.querySelectorAll('.scene')];
+const rail=document.getElementById('rail');
+const stepEl=document.getElementById('step'),ttl=document.getElementById('ttl'),txt=document.getElementById('txt'),playBtn=document.getElementById('play');
+const wave=document.getElementById('wave');for(let i=0;i<22;i++){const e=document.createElement('i');e.style.animationDelay=(-(i*.13)%1.1)+'s';wave.appendChild(e)}
+const grid=document.getElementById('grid');for(let r=0;r<6;r++)for(let c=0;c<10;c++){const e=document.createElement('i');e.style.animationDelay=(Math.hypot(r-2.5,c-4.5)*.18)+'s';grid.appendChild(e)}
+CH.forEach((c,i)=>{const b=document.createElement('button');b.type='button';b.innerHTML='<span class="bar"><i></i></span><span><span class="n">'+String(i+1).padStart(2,'0')+'</span> '+c.k+'</span>';b.addEventListener('click',()=>{go(i);});rail.appendChild(b)});
+const railBtns=[...rail.children];
+let cur=0,playing=false,t0=0,raf=0;
+function go(i){
+  cur=(i+CH.length)%CH.length;
+  scenes.forEach((s,j)=>{s.hidden=j!==cur;s.classList.remove('go')});
+  const s=scenes[cur];void s.offsetWidth;s.classList.add('go');
+  stepEl.textContent='Chapter '+(cur+1)+' of '+CH.length;ttl.textContent=CH[cur].t;txt.textContent=CH[cur].x;
+  railBtns.forEach((b,j)=>{b.classList.toggle('done',j<cur);b.querySelector('.bar i').style.width=j<cur?'100%':'0';if(j===cur)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current')});
+  clearInterval(audT);
+  if(cur===0){showAud(0);audT=setInterval(()=>showAud((audI+1)%AUD.length),2300)}
+  t0=performance.now();
+}
+function tick(now){
+  if(!playing)return;
+  const p=Math.min(1,(now-t0)/DUR);
+  railBtns[cur].querySelector('.bar i').style.width=(p*100)+'%';
+  if(p>=1){if(cur===CH.length-1){setPlay(false);return}go(cur+1)}
+  raf=requestAnimationFrame(tick);
+}
+function setPlay(on){playing=on;playBtn.textContent=on?'Pause':(cur===CH.length-1?'Replay':'Play story');cancelAnimationFrame(raf);if(on){if(cur===CH.length-1&&!railBtns[cur].classList.contains('x'))go(0);t0=performance.now();raf=requestAnimationFrame(tick)}}
+playBtn.addEventListener('click',()=>setPlay(!playing));
+document.getElementById('next').addEventListener('click',()=>{go(cur+1);if(playing)t0=performance.now()});
+document.getElementById('prev').addEventListener('click',()=>{go(cur-1);if(playing)t0=performance.now()});
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'){go(cur+1)}else if(e.key==='ArrowLeft'){go(cur-1)}else if(e.key===' '&&e.target===document.body){e.preventDefault();setPlay(!playing)}});
+go(0);
+</script>
+
+</body></html>
