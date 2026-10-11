@@ -1,0 +1,14 @@
+# Nextier
+
+> Nextier is a revenue execution engine. Its data engine finds who to talk to and stops at an initial SMS ready for a person to launch. Nextier handles the texts, CloudGreet handles the calls, and your team takes the meeting.
+
+## Pages
+- [Digital Front Office demo](https://nextiertech11105.github.io/nextier-flow/demo.html): Real Estate Agent OS for brokerages, Digital Receptionist for B2B teams, Customer Service for retail. Pricing for brokerages, proof, CRM integrations and booking.
+- [Story Mode](https://nextiertech11105.github.io/nextier-flow/story.html): one reply, from first text to booked meeting.
+- [3D Flow](https://nextiertech11105.github.io/nextier-flow/): the system as a 3D flow.
+
+## Facts
+- Brokerage pricing: $10,000 installation, $5,000 per month management, $100 per agent seat per month. Brokerages set their own agent price.
+- Works with Zoho CRM, Salesforce, HubSpot, HighLevel and Follow Up Boss.
+- Built on RealEstateAPI, SignalHouse, Tracerfy, USBizData, Apify, CloudGreet, Anthropic and OpenAI.
+- Book a demo: https://www.nxtier.ai/book/nextier
