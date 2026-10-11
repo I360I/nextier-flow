@@ -2057,5 +2057,128 @@ route(true);
 })();
 </script>
 
+<!-- Live agent: "Start the call" talks to a real CloudGreet demo agent in-browser,
+     with the scripted sample as an automatic fallback (mic denied / error). -->
+<style>
+  [data-transcript] .li-row{display:flex;gap:10px;margin:0 0 9px;font-size:14px;line-height:1.46}
+  [data-transcript] .li-row b{flex:0 0 34px;text-transform:uppercase;font-size:10px;letter-spacing:.08em;opacity:.5;margin-top:3px}
+  [data-transcript] .li-you{opacity:.82}
+  .live-done{margin-top:12px;padding-top:12px;border-top:1px solid rgba(0,0,0,.09)}
+  .live-done p{margin:0 0 10px;font-size:13.5px;opacity:.82}
+</style>
+<script type="module">
+(function () {
+  const CG = "https://cloudgreet.com/api/demo/web-call";
+  // demo panel id -> CloudGreet demo vertical (existing per-vertical agents)
+  const MAP = { "real-estate": "realestate", "b2b": "lawyer", "retail": "restaurant" };
+  const $ = (s, r = document) => r.querySelector(s);
+  const esc = s => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const live = new WeakMap();
+
+  let SDK = null;
+  const loadSDK = async () => {
+    if (SDK) return SDK;
+    const m = await import("https://esm.sh/retell-client-js-sdk@2.0.8");
+    SDK = m.RetellWebClient;
+    return SDK;
+  };
+
+  const panelOf = el => (el.closest ? el.closest(".panel") : null);
+  const setStatus = (p, t, on) => { const s = $("[data-status]", p); if (s) { s.textContent = t; s.classList.toggle("live", !!on); } };
+  const toEndBtn = b => { if (!b) return; if (b.dataset.origHtml === undefined) b.dataset.origHtml = b.innerHTML; b.innerHTML = "End call"; };
+  const restoreBtn = p => { const b = $("[data-start]", p); if (b && b.dataset.origHtml !== undefined) b.innerHTML = b.dataset.origHtml; };
+
+  function renderTranscript(p, tx) {
+    const tr = $("[data-transcript]", p); if (!tr) return;
+    if (!tx.length) return;
+    tr.innerHTML = tx.map(t => {
+      const agent = t.role === "agent";
+      return `<div class="li-row ${agent ? "li-agent" : "li-you"}"><b>${agent ? "AI" : "You"}</b><span>${esc(t.content)}</span></div>`;
+    }).join("");
+    tr.scrollTop = tr.scrollHeight;
+  }
+
+  function endLive(p) {
+    const s = live.get(p); if (!s) return;
+    try { s.client.stopCall(); } catch (e) {}
+    live.delete(p);
+    restoreBtn(p);
+    const v = $("[data-voice]", p); if (v) v.style.display = "";
+    setStatus(p, "Call ended", false);
+    const tr = $("[data-transcript]", p);
+    if (tr && !$(".live-done", tr)) {
+      const d = document.createElement("div");
+      d.className = "live-done";
+      d.innerHTML = `<p>That was a live sample assistant. The real one answers your own business line, day and night.</p><a class="btn btn-primary btn-sm" href="#book">Book a real demo</a>`;
+      tr.appendChild(d);
+    }
+  }
+
+  function startLive(p) {
+    const vertical = MAP[p.id] || "default";
+    const btn = $("[data-start]", p), opts = $("[data-opts]", p), voice = $("[data-voice]", p), tr = $("[data-transcript]", p);
+    if (opts) opts.innerHTML = "";
+    if (voice) voice.style.display = "none";
+    setStatus(p, "Connecting", true);
+    if (tr) tr.innerHTML = '<p class="ph">Connecting you to a live assistant… allow microphone access when your browser asks.</p>';
+
+    return (async () => {
+      let token;
+      try {
+        const res = await fetch(CG, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ vertical }) });
+        if (!res.ok) throw new Error("token " + res.status);
+        token = (await res.json()).access_token;
+        if (!token) throw new Error("no token");
+      } catch (e) { return { ok: false, reason: "token" }; }
+
+      let Client;
+      try { Client = await loadSDK(); } catch (e) { return { ok: false, reason: "sdk" }; }
+
+      const client = new Client();
+      const state = { client, started: false };
+      live.set(p, state);
+
+      return await new Promise(resolve => {
+        let settled = false;
+        const done = v => { if (!settled) { settled = true; resolve(v); } };
+        client.on("call_started", () => { state.started = true; setStatus(p, "Live", true); if (tr) tr.innerHTML = '<p class="ph">You’re connected. Say hello.</p>'; toEndBtn(btn); done({ ok: true }); });
+        client.on("call_ended", () => { if (live.get(p) === state) endLive(p); });
+        client.on("update", u => { if (u && Array.isArray(u.transcript)) renderTranscript(p, u.transcript); });
+        client.on("error", () => { if (!state.started) { live.delete(p); done({ ok: false, reason: "err" }); } else endLive(p); try { client.stopCall(); } catch (e) {} });
+        try { client.startCall({ accessToken: token }); }
+        catch (e) { if (!state.started) { live.delete(p); done({ ok: false, reason: "mic" }); } }
+        setTimeout(() => { if (!state.started) { try { client.stopCall(); } catch (e) {} live.delete(p); done({ ok: false, reason: "timeout" }); } }, 12000);
+      });
+    })();
+  }
+
+  function scripted(p) { try { restoreBtn(p); const v = $("[data-voice]", p); if (v) v.style.display = ""; p._call && p._call.start(); } catch (e) {} }
+
+  async function go(p) {
+    if (!p || !MAP[p.id]) return;
+    if (live.has(p)) { endLive(p); return; }             // second press = hang up
+    if (p.dataset.micDenied === "1") { scripted(p); return; }
+    const r = await startLive(p);
+    if (!r.ok) {
+      if (r.reason === "mic" || r.reason === "err") p.dataset.micDenied = "1";
+      scripted(p);                                         // graceful: run the polished scripted sample
+    }
+  }
+
+  // Capture phase so the page's own scripted click handler doesn't also fire.
+  document.addEventListener("click", e => {
+    const start = e.target.closest && e.target.closest("[data-start]");
+    const tryb = e.target.closest && e.target.closest("[data-try]");
+    const btn = start || tryb;
+    if (!btn) return;
+    const p = panelOf(btn);
+    if (!p || !MAP[p.id]) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    if (tryb) { const step = $("[data-call]", p); if (step && step.closest(".step")) step.closest(".step").scrollIntoView({ behavior: "smooth", block: "start" }); }
+    go(p);
+  }, true);
+})();
+</script>
+
 </body>
 </html>
