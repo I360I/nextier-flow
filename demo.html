@@ -2120,8 +2120,12 @@ route(true);
 
   function endLive(p) {
     const s = live.get(p); if (!s) return;
-    try { s.client.stopCall(); } catch (e) {}
+    s.ended = true;
     live.delete(p);
+    p._endedAt = Date.now();
+    // Tear the SDK down hard so no late call_started / auto-reconnect brings it back.
+    try { if (s.client.removeAllListeners) s.client.removeAllListeners(); } catch (e) {}
+    try { s.client.stopCall(); } catch (e) {}
     restoreBtn(p);
     const v = $("[data-voice]", p); if (v) v.style.display = "";
     setStatus(p, "Call ended", false);
@@ -2161,9 +2165,9 @@ route(true);
       return await new Promise(resolve => {
         let settled = false;
         const done = v => { if (!settled) { settled = true; resolve(v); } };
-        client.on("call_started", () => { state.started = true; setStatus(p, "Live", true); if (tr) tr.innerHTML = '<p class="ph">You’re connected. Say hello.</p>'; toEndBtn(btn); done({ ok: true }); });
-        client.on("call_ended", () => { if (live.get(p) === state) endLive(p); });
-        client.on("update", u => { if (u && Array.isArray(u.transcript)) renderTranscript(p, u.transcript); });
+        client.on("call_started", () => { if (state.ended) { try { client.stopCall(); } catch (e) {} return; } state.started = true; setStatus(p, "Live", true); if (tr) tr.innerHTML = '<p class="ph">You’re connected. Say hello.</p>'; toEndBtn(btn); done({ ok: true }); });
+        client.on("call_ended", () => { if (!state.ended && live.get(p) === state) endLive(p); });
+        client.on("update", u => { if (!state.ended && u && Array.isArray(u.transcript)) renderTranscript(p, u.transcript); });
         client.on("error", () => { if (!state.started) { live.delete(p); done({ ok: false, reason: "err" }); } else endLive(p); try { client.stopCall(); } catch (e) {} });
         try { client.startCall({ accessToken: token }); }
         catch (e) { if (!state.started) { live.delete(p); done({ ok: false, reason: "mic" }); } }
@@ -2177,6 +2181,7 @@ route(true);
   async function go(p) {
     if (!p || !MAP[p.id]) return;
     if (live.has(p)) { endLive(p); return; }             // second press = hang up
+    if (p._endedAt && Date.now() - p._endedAt < 1500) return;  // brief cooldown so a hang-up can't instantly re-dial
     if (p.dataset.micDenied === "1") { scripted(p); return; }
     const r = await startLive(p);
     if (!r.ok) {
